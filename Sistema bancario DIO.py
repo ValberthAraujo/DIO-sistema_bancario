@@ -2,17 +2,21 @@
 # ------------------------------------------  IMPORTAÇÕES  ------------------------------------------- #
 
 from dataclasses import dataclass
+from collections import defaultdict
 
 
 # --------------------------------------------  CLASSES  --------------------------------------------- #
 
 @dataclass
 class Cliente:
+    cpf: int
     nome: str
     senha: str
     nascimento: int
     endereco: str
-    extrato: str
+
+@dataclass
+class Conta:
     cpf: int
     cesta: int
     limite_saque_qtd: int
@@ -20,12 +24,19 @@ class Cliente:
     tarifa: int
     saldo: int
     numero_saques: int
+    extrato: str
+    agencia: int
+    conta: int
+
 
 # ---------------------------------------  VARIÁVEIS GLOBAIS  ---------------------------------------- #
 
 base_clientes = []
+cliente_contas = defaultdict(list)
+
 
 # --------------------------------------------  FUNÇÕES  --------------------------------------------- #
+
 
 def validar_input(input__desejado: str, tamanho_variavel: int):
     while True:
@@ -81,13 +92,13 @@ def saque(saldo_cliente, extrato_cliente, numero_saques_cliente):
         numero_saques_cliente += 1
     else:
         print("Operação falhou! O valor informado é inválido.")
-    
+
     return saldo_cliente, extrato_cliente, numero_saques_cliente
 
 
-    
+
 def mostrar_extrato(extrato_cliente, saldo_cliente):
-    
+
     print("\n================ EXTRATO ================")
     print(f"\nSeu extrato está disponível, {base_clientes[id_cliente].nome}, confira suas informações!")
     print(f"\nO plano selecionado foi: {base_clientes[id_cliente].cesta}")
@@ -133,17 +144,17 @@ def cesta_servicos():
             case _:
                 print("Por favor, selecione uma opção válida")
 
+def gerar_conta():
 
-def cadastrar_cliente():
-    
-    opcao_cesta = cesta_servicos()
+    if not base_clientes:
+        conta_gerada = 1
+    else:
+        conta_gerada = len(base_clientes) + 1
+    return conta_gerada
 
-    cesta_selecionada = opcao_cesta["Cesta selecionada"]
-    limite_saque_qtd = opcao_cesta["Limite de saques quantidade"]
-    limite_saque_valor = opcao_cesta["Limite de saques valor"]
-    tarifa_selecionada = opcao_cesta["Tarifa"]
 
-    cpf_usuario = validar_input("Insira o seu CPF (apenas números, 11 digitos) ", 11)
+def cadastrar_pessoa(cpf_usuario):
+
     data_nascimento = validar_input("Digite o data de nascimento (DDMMYYYY) ", 8)
 
     for i in base_clientes:
@@ -161,39 +172,39 @@ def cadastrar_cliente():
         endereco_usuario = f"{logradouro}, {bairro} - {cidade}/{estado}"
 
         resposta = input(f"""
-        
-        O endereço: 
-        {endereco_usuario}
-        está correto?
-        
-        [1] Sim
-        [2] Não
-        
-        => """)
+
+            O endereço: 
+            {endereco_usuario}
+            está correto?
+
+            [1] Sim
+            [2] Não
+
+            => """)
 
         if resposta == "1":
             break
         else:
             continue
 
-
-
-
     return Cliente(
-        nome = input("Insira seu nome: ").strip(),
-        senha = input("Informe a senha desejada: ").strip(),
-        nascimento = data_nascimento ,
         cpf = cpf_usuario,
-        endereco = endereco_usuario,
-        cesta = cesta_selecionada,
-        limite_saque_qtd = limite_saque_qtd,
-        limite_saque_valor = limite_saque_valor,
-        tarifa = tarifa_selecionada,
-        saldo = 0,
-        numero_saques = 0,
-        extrato = ""
+        nome=input("Insira seu nome: ").strip(),
+        senha=input("Informe a senha desejada: ").strip(),
+        nascimento=data_nascimento,
+        endereco=endereco_usuario
     )
-    
+
+
+def cadastrar_cliente():
+
+    cpf_usuario = validar_input("Insira o seu CPF (apenas números, 11 digitos) ", 11)
+
+    pessoa = cadastrar_pessoa(cpf_usuario)
+    conta = cadastrar_conta(cpf_usuario)
+
+    return pessoa, conta
+
 
 def login_cliente():
     cpf = int(input("Bem vindo cliente, insira seu cpf (apenas números): ").strip())
@@ -201,9 +212,46 @@ def login_cliente():
 
     for i in base_clientes:
         if i.cpf == cpf and i.senha == senha:
-            return True, base_clientes.index(i)
+            input(f"""
 
+            Selecione uma conta: 
+            {mostrar_contas(cpf)}
+            
+            => """)
+            return True, base_clientes.index(i)
     return False, None
+
+def mostrar_contas(cpf):
+    cc = 0
+    ag = 0
+    for i in range(0, len(cliente_contas[cpf])):
+        ag = cliente_contas[cpf][i].agencia
+        cc = cliente_contas[cpf][i].conta
+    return f"Agência: {ag}, Conta corrente: {cc} \n"
+
+def cadastrar_conta(cpf_usuario):
+
+    opcao_cesta = cesta_servicos()
+
+    cesta_selecionada = opcao_cesta["Cesta selecionada"]
+    limite_saque_qtd = opcao_cesta["Limite de saques quantidade"]
+    limite_saque_valor = opcao_cesta["Limite de saques valor"]
+    tarifa_selecionada = opcao_cesta["Tarifa"]
+
+    conta_usuario = gerar_conta()
+
+    return Conta(
+        cpf = cpf_usuario,
+        cesta = cesta_selecionada,
+        limite_saque_qtd = limite_saque_qtd,
+        limite_saque_valor = limite_saque_valor,
+        tarifa = tarifa_selecionada,
+        saldo = 0,
+        numero_saques = 0,
+        extrato = "",
+        agencia = 1,
+        conta = conta_usuario
+    )
 
 # ---------------------------------------  PROGRAMA PRINCIPAL  --------------------------------------- #
 
@@ -218,13 +266,13 @@ while True:
     [0] Sair
     
     => """)
-    
+
     if menu == "1":
-        
+
         resultado_login, id_cliente = login_cliente()
-        
+
         while resultado_login:
-            
+
             opcao = input(f"""
 
             Bem vindo {base_clientes[id_cliente].nome}! Escolha o que deseja fazer.
@@ -236,7 +284,7 @@ while True:
             [0] Sair
 
             => """)
-            
+
             if opcao == "1":
                 base_clientes[id_cliente].saldo, base_clientes[id_cliente].extrato = deposito(base_clientes[id_cliente].saldo, base_clientes[id_cliente].extrato)
             elif opcao == "2":
@@ -259,9 +307,10 @@ while True:
             print("Login falhou, tente novamente!")
 
     if menu == "2":
-        
-        cliente = cadastrar_cliente()
+
+        cliente, conta = cadastrar_cliente()
         base_clientes.append(cliente)
-        
+        cliente_contas[cliente.cpf].append(conta)
+
     if menu == "0":
         exit()
