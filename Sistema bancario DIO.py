@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 
+
 # --------------------------------------------- Classes ---------------------------------------------
 
 @dataclass
@@ -9,9 +10,9 @@ class Cliente:
     nome: str
     senha: str
     nascimento: str
-    cpf: str
     endereco: str
     extrato: str
+    cpf: int
     cesta: int
     limite_saque_qtd: int
     limite_saque_valor: int
@@ -24,10 +25,33 @@ class Cliente:
 base_clientes = []
 
 # --------------------------------------------- Funções ---------------------------------------------
+
+def validar_input(input__desejado: str, tamanho_variavel: int):
+    while True:
+
+        variavel_validada = 0
+
+        try:
+            variavel_validada = int(input(input__desejado).strip())
+
+            if tamanho_variavel == 0:
+                try:
+                    variavel_validada = input__desejado
+                except ValueError:
+                    print('Digite um valor valido')
+            else:
+                if variavel_validada < 0 or len(str(variavel_validada)) != tamanho_variavel:
+                    raise ValueError
+
+        except ValueError:
+            print("Insira corretamente os dados requisitados ")
+            continue
+        break
+    return variavel_validada
     
 def deposito(saldo_cliente, extrato_cliente):
     
-    valor = float(input("Informe o valor do depósito: "))
+    valor = int(validar_input("Informe o valor do depósito: ", 0))
 
     if valor > 0:
         
@@ -71,6 +95,7 @@ def mostrar_extrato(extrato_cliente, saldo_cliente):
     print("===========================================")
 
 
+# noinspection PyUnreachableCode
 def cesta_servicos():
 
     opcao_cesta = {}
@@ -86,6 +111,7 @@ def cesta_servicos():
     
         => """)
 
+        # noinspection PyUnreachableCode
         match plano:
             case "1":
                 opcao_cesta["Cesta selecionada"] = "Prata"
@@ -109,6 +135,7 @@ def cesta_servicos():
                 print("Por favor, selecione uma opção válida")
 
 
+# noinspection PyTypeChecker
 def cadastrar_cliente():
     
     opcao_cesta = cesta_servicos()
@@ -118,11 +145,14 @@ def cadastrar_cliente():
     limite_saque_valor = opcao_cesta["Limite de saques valor"]
     tarifa_selecionada = opcao_cesta["Tarifa"]
 
+    cpf_usuario = validar_input("Insira o seu CPF (apenas números, 11 digitos) ", 11)
+    data_nascimento = validar_input("Digite o data de nascimento (DDMMYYYY) ", 8)
+
     return Cliente(
         nome = input("Insira seu nome: ").strip(),
         senha = input("Informe a senha desejada: ").strip(),
-        nascimento = input("Insira sua data de nascimento: ").strip(),
-        cpf = input("Informe o seu CPF: ").strip(),
+        nascimento = data_nascimento ,
+        cpf = cpf_usuario,
         endereco = input("Informe seu endereço: ").strip(),
         cesta = cesta_selecionada,
         limite_saque_qtd = limite_saque_qtd,
@@ -135,8 +165,7 @@ def cadastrar_cliente():
     
 
 def login_cliente():
-    
-    cpf = input("Bem vindo cliente, insira seu cpf: ").strip()
+    cpf = int(input("Bem vindo cliente, insira seu cpf (apenas números): ").strip())
     senha = input("Insira sua senha: ").strip()
 
     for i in base_clientes:
