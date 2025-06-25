@@ -106,7 +106,7 @@ def cesta_servicos():
                 opcao_cesta["Tarifa"] = 20
                 return opcao_cesta
             case _:
-                print("Opção inválida. Por favor, selecione 1, 2 ou 3.")
+                print("Por favor, selecione uma opção válida")
 
 
 def cadastrar_cliente():
