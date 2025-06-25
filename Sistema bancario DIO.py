@@ -1,15 +1,16 @@
-# --------------------------------------------- Importações ---------------------------------------------
+
+# ------------------------------------------  IMPORTAÇÕES  ------------------------------------------- #
 
 from dataclasses import dataclass
 
 
-# --------------------------------------------- Classes ---------------------------------------------
+# --------------------------------------------  CLASSES  --------------------------------------------- #
 
 @dataclass
 class Cliente:
     nome: str
     senha: str
-    nascimento: str
+    nascimento: int
     endereco: str
     extrato: str
     cpf: int
@@ -20,11 +21,11 @@ class Cliente:
     saldo: int
     numero_saques: int
 
-# --------------------------------------------- Variáveis globais ---------------------------------------------
+# ---------------------------------------  VARIÁVEIS GLOBAIS  ---------------------------------------- #
 
 base_clientes = []
 
-# --------------------------------------------- Funções ---------------------------------------------
+# --------------------------------------------  FUNÇÕES  --------------------------------------------- #
 
 def validar_input(input__desejado: str, tamanho_variavel: int):
     while True:
@@ -36,7 +37,7 @@ def validar_input(input__desejado: str, tamanho_variavel: int):
 
             if tamanho_variavel == 0:
                 try:
-                    variavel_validada = input__desejado
+                    variavel_validada = int(input__desejado)
                 except ValueError:
                     print('Digite um valor valido')
             else:
@@ -47,12 +48,11 @@ def validar_input(input__desejado: str, tamanho_variavel: int):
             print("Insira corretamente os dados requisitados ")
             continue
         break
-    return variavel_validada
+    return int(variavel_validada)
     
 def deposito(saldo_cliente, extrato_cliente):
     
-    valor = int(validar_input("Informe o valor do depósito: ", 0))
-
+    valor = validar_input("Informe o valor do depósito: ", 0)
     if valor > 0:
         
         saldo_cliente += valor
@@ -89,13 +89,13 @@ def saque(saldo_cliente, extrato_cliente, numero_saques_cliente):
 def mostrar_extrato(extrato_cliente, saldo_cliente):
     
     print("\n================ EXTRATO ================")
+    print(f"\nSeu extrato está disponível, {base_clientes[id_cliente].nome}, confira suas informações!")
     print(f"\nO plano selecionado foi: {base_clientes[id_cliente].cesta}")
+    print(f"\nDébito cesta de serviços R$ {base_clientes[id_cliente].tarifa}")
     print("Não foram realizadas movimentações." if not extrato_cliente else extrato_cliente)
     print(f"\nSaldo: R$ {(saldo_cliente - base_clientes[id_cliente].tarifa):.2f}")
     print("===========================================")
 
-
-# noinspection PyUnreachableCode
 def cesta_servicos():
 
     opcao_cesta = {}
@@ -111,7 +111,6 @@ def cesta_servicos():
     
         => """)
 
-        # noinspection PyUnreachableCode
         match plano:
             case "1":
                 opcao_cesta["Cesta selecionada"] = "Prata"
@@ -135,7 +134,6 @@ def cesta_servicos():
                 print("Por favor, selecione uma opção válida")
 
 
-# noinspection PyTypeChecker
 def cadastrar_cliente():
     
     opcao_cesta = cesta_servicos()
@@ -148,12 +146,45 @@ def cadastrar_cliente():
     cpf_usuario = validar_input("Insira o seu CPF (apenas números, 11 digitos) ", 11)
     data_nascimento = validar_input("Digite o data de nascimento (DDMMYYYY) ", 8)
 
+    for i in base_clientes:
+        if i.cpf == cpf_usuario:
+            print("CPF já cadastrado, entre em contato conosco! ")
+            exit()
+
+    while True:
+
+        logradouro = input("Informe seu logradoro: ").strip()
+        bairro = input("Informe seu bairro: ").strip()
+        cidade = input("Informe sua cidade: ").strip()
+        estado = input("Informe seu estado: ").strip()
+
+        endereco_usuario = f"{logradouro}, {bairro} - {cidade}/{estado}"
+
+        resposta = input(f"""
+        
+        O endereço: 
+        {endereco_usuario}
+        está correto?
+        
+        [1] Sim
+        [2] Não
+        
+        => """)
+
+        if resposta == "1":
+            break
+        else:
+            continue
+
+
+
+
     return Cliente(
         nome = input("Insira seu nome: ").strip(),
         senha = input("Informe a senha desejada: ").strip(),
         nascimento = data_nascimento ,
         cpf = cpf_usuario,
-        endereco = input("Informe seu endereço: ").strip(),
+        endereco = endereco_usuario,
         cesta = cesta_selecionada,
         limite_saque_qtd = limite_saque_qtd,
         limite_saque_valor = limite_saque_valor,
@@ -174,7 +205,7 @@ def login_cliente():
 
     return False, None
 
-# --------------------------------------------- Programa Principal ---------------------------------------------
+# ---------------------------------------  PROGRAMA PRINCIPAL  --------------------------------------- #
 
 while True:
 
