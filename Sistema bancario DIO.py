@@ -71,6 +71,7 @@ def mostrar_extrato(extrato_cliente, saldo_cliente):
     print("===========================================")
 
 
+# noinspection PyUnreachableCode
 def cesta_servicos():
 
     opcao_cesta = {}
@@ -86,6 +87,7 @@ def cesta_servicos():
     
         => """)
 
+        # noinspection PyUnreachableCode
         match plano:
             case "1":
                 opcao_cesta["Cesta selecionada"] = "Prata"
@@ -119,6 +121,7 @@ def cadastrar_cliente():
     tarifa_selecionada = opcao_cesta["Tarifa"]
 
     while True:
+        cpf_usuario = 0
         try:
             cpf_usuario = int(input("Informe o seu CPF: ").strip())
 
@@ -146,7 +149,7 @@ def cadastrar_cliente():
     
 
 def login_cliente():
-    cpf = input("Bem vindo cliente, insira seu cpf (apenas números): ").strip()
+    cpf = int(input("Bem vindo cliente, insira seu cpf (apenas números): ").strip())
     senha = input("Insira sua senha: ").strip()
 
     for i in base_clientes:
