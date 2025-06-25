@@ -118,11 +118,22 @@ def cadastrar_cliente():
     limite_saque_valor = opcao_cesta["Limite de saques valor"]
     tarifa_selecionada = opcao_cesta["Tarifa"]
 
+    while True:
+        try:
+            cpf_usuario = int(input("Informe o seu CPF: ").strip())
+
+            if cpf_usuario < 0 or len(str(cpf_usuario)) != 11:
+                raise ValueError
+        except ValueError:
+            print("CPF inválido, insira os dados corretamente. (apenas números) ")
+            continue
+        break
+
     return Cliente(
         nome = input("Insira seu nome: ").strip(),
         senha = input("Informe a senha desejada: ").strip(),
         nascimento = input("Insira sua data de nascimento: ").strip(),
-        cpf = input("Informe o seu CPF: ").strip(),
+        cpf = cpf_usuario,
         endereco = input("Informe seu endereço: ").strip(),
         cesta = cesta_selecionada,
         limite_saque_qtd = limite_saque_qtd,
@@ -135,15 +146,7 @@ def cadastrar_cliente():
     
 
 def login_cliente():
-    try:
-        cpf = input("Bem vindo cliente, insira seu cpf (apenas números): ").strip()
-        for i in base_clientes:
-            if i.cpf == cpf:
-                print("CPF já cadastrado, tente fazer login ou contatar-nos em caso de falha")
-                exit()
-    except:
-        print("Digite o CPF com apenas números")
-        
+    cpf = input("Bem vindo cliente, insira seu cpf (apenas números): ").strip()
     senha = input("Insira sua senha: ").strip()
 
     for i in base_clientes:
