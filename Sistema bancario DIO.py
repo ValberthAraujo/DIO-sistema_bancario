@@ -9,9 +9,9 @@ class Cliente:
     nome: str
     senha: str
     nascimento: str
-    cpf: str
     endereco: str
     extrato: str
+    cpf: int
     cesta: int
     limite_saque_qtd: int
     limite_saque_valor: int
@@ -135,8 +135,15 @@ def cadastrar_cliente():
     
 
 def login_cliente():
-    
-    cpf = input("Bem vindo cliente, insira seu cpf: ").strip()
+    try:
+        cpf = input("Bem vindo cliente, insira seu cpf (apenas números): ").strip()
+        for i in base_clientes:
+            if i.cpf == cpf:
+                print("CPF já cadastrado, tente fazer login ou contatar-nos em caso de falha")
+                exit()
+    except:
+        print("Digite o CPF com apenas números")
+        
     senha = input("Insira sua senha: ").strip()
 
     for i in base_clientes:
