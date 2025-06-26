@@ -227,7 +227,7 @@ def mostrar_contas(cpf):
     for i in range(0, len(cliente_contas[cpf])):
         ag = cliente_contas[cpf][i].agencia
         cc = cliente_contas[cpf][i].conta
-        listar_contas += f"{[i + 1]} Agência: {ag}, Conta corrente: {cc} \n"
+        listar_contas += f"\n{[i + 1]} Agência: {ag}, Conta corrente: {cc}"
 
     return listar_contas
 
@@ -308,7 +308,9 @@ while True:
                 conta_usada = input(f"""
 
                                     Selecione uma conta: 
+                                    
                                     {mostrar_contas(base_clientes[id_cliente].cpf)}
+                                    
                                     => """)
             elif opcao == "0":
                 exit()
