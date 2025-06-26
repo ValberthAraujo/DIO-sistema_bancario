@@ -82,9 +82,9 @@ def saque(saldo_cliente, extrato_cliente, numero_saques_cliente):
 
     if valor > saldo_cliente:
         print("A operação falhou! Saldo insuficiente.")       
-    elif valor > base_clientes[id_cliente].limite_saque_valor:
+    elif valor > conta_acessada.limite_saque_valor:
         print("Operação falhou! Limite de saque atingido.")
-    elif numero_saques_cliente >= base_clientes[id_cliente].limite_saque_qtd:
+    elif numero_saques_cliente >= conta_acessada.limite_saque_qtd:
         print("Operação falhou! Você atingiu o limite de saques da sua conta!")
     elif valor > 0:
         saldo_cliente -= valor
@@ -101,10 +101,10 @@ def mostrar_extrato(extrato_cliente, saldo_cliente):
 
     print("\n================ EXTRATO ================")
     print(f"\nSeu extrato está disponível, {base_clientes[id_cliente].nome}, confira suas informações!")
-    print(f"\nO plano selecionado foi: {base_clientes[id_cliente].cesta}")
-    print(f"\nDébito cesta de serviços R$ {base_clientes[id_cliente].tarifa}")
+    print(f"\nO plano selecionado foi: {conta_acessada.cesta}")
+    print(f"\nDébito cesta de serviços R$ {conta_acessada.tarifa}")
     print("Não foram realizadas movimentações." if not extrato_cliente else extrato_cliente)
-    print(f"\nSaldo: R$ {(saldo_cliente - base_clientes[id_cliente].tarifa):.2f}")
+    print(f"\nSaldo: R$ {(saldo_cliente - conta_acessada.tarifa):.2f}")
     print("===========================================")
 
 def cesta_servicos():
@@ -201,33 +201,36 @@ def cadastrar_cliente():
     cpf_usuario = validar_input("Insira o seu CPF (apenas números, 11 digitos) ", 11)
 
     pessoa = cadastrar_pessoa(cpf_usuario)
-    conta = cadastrar_conta(cpf_usuario)
+    conta_usuario = cadastrar_conta(cpf_usuario)
 
-    return pessoa, conta
+    return pessoa, conta_usuario
 
 
 def login_cliente():
     cpf = int(input("Bem vindo cliente, insira seu cpf (apenas números): ").strip())
     senha = input("Insira sua senha: ").strip()
 
-    for i in base_clientes:
-        if i.cpf == cpf and i.senha == senha:
-            input(f"""
-
-            Selecione uma conta: 
-            {mostrar_contas(cpf)}
-            
-            => """)
-            return True, base_clientes.index(i)
+    for i, cliente_atual in enumerate(base_clientes):
+        if cliente_atual.cpf == cpf and cliente_atual.senha == senha:
+            conta_selecionada = input(f"""
+                    
+                                Selecione uma conta: 
+                                {mostrar_contas(cpf)}
+                                
+                                => """)
+            return True, base_clientes.index(cliente_atual), conta_selecionada
     return False, None
 
 def mostrar_contas(cpf):
-    cc = 0
+    # para o pycharm ficar quieto
+    i = 0
     ag = 0
+    cc = 0
+
     for i in range(0, len(cliente_contas[cpf])):
         ag = cliente_contas[cpf][i].agencia
         cc = cliente_contas[cpf][i].conta
-    return f"Agência: {ag}, Conta corrente: {cc} \n"
+    return f"{[i + 1]} Agência: {ag}, Conta corrente: {cc} \n"
 
 def cadastrar_conta(cpf_usuario):
 
@@ -269,38 +272,40 @@ while True:
 
     if menu == "1":
 
-        resultado_login, id_cliente = login_cliente()
+        resultado_login, id_cliente, conta_usada = login_cliente()
+
+        conta_acessada = cliente_contas[base_clientes[id_cliente].cpf][int(conta_usada) - 1]
 
         while resultado_login:
 
             opcao = input(f"""
 
-            Bem vindo {base_clientes[id_cliente].nome}! Escolha o que deseja fazer.
+            Bem vindo {base_clientes[id_cliente].nome}, conta: {conta_acessada.conta}! Escolha o que deseja fazer.
             
             [1] Depositar
             [2] Sacar
             [3] Extrato
             [4] Alterar plano
+            [5] Criar nova conta
+            [6] Alterar conta
             [0] Sair
 
             => """)
 
             if opcao == "1":
-                base_clientes[id_cliente].saldo, base_clientes[id_cliente].extrato = deposito(base_clientes[id_cliente].saldo, base_clientes[id_cliente].extrato)
+                conta_acessada.saldo, conta_acessada.extrato = deposito(conta_acessada.saldo, conta_acessada.extrato)
             elif opcao == "2":
-                base_clientes[id_cliente].saldo, base_clientes[id_cliente].extrato, base_clientes[id_cliente].numero_saques = saque(base_clientes[id_cliente].saldo, base_clientes[id_cliente].extrato, base_clientes[id_cliente].numero_saques)
+                conta_acessada.saldo, conta_acessada.extrato, conta_acessada.numero_saques = saque(conta_acessada.saldo, conta_acessada.extrato, conta_acessada.numero_saques)
             elif opcao == "3":
-                mostrar_extrato(base_clientes[id_cliente].extrato, base_clientes[id_cliente].saldo)
+                mostrar_extrato(conta_acessada.extrato, conta_acessada.saldo)
             elif opcao == "4":
                 dados_cesta = cesta_servicos()
-
-                base_clientes[id_cliente].cesta = dados_cesta["Cesta selecionada"]
-                base_clientes[id_cliente].limite_saque_qtd = dados_cesta["Limite de saques quantidade"]
-                base_clientes[id_cliente].limite_saque_valor = dados_cesta["Limite de saques valor"]
-                base_clientes[id_cliente].tarifa = dados_cesta["Tarifa"]
-
+            elif opcao == "5":
+                cadastrar_conta(conta_acessada.cpf)
             elif opcao == "0":
                 exit()
+            elif opcao == "6":
+
             else:
                 print("por favor, selecione uma opção válida")
         else:
@@ -310,7 +315,7 @@ while True:
 
         cliente, conta = cadastrar_cliente()
         base_clientes.append(cliente)
-        cliente_contas[cliente.cpf].append(conta)
+        cliente_contas.setdefault(cliente.cpf, []).append(conta)
 
     if menu == "0":
         exit()
