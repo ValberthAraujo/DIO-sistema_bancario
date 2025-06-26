@@ -25,7 +25,7 @@ class Conta:
     saldo: int
     numero_saques: int
     extrato: str
-    agencia: int
+    agencia: str
     conta: int
 
 
@@ -251,7 +251,7 @@ def cadastrar_conta(cpf_usuario):
         saldo = 0,
         numero_saques = 0,
         extrato = "",
-        agencia = 1,
+        agencia = "0001",
         conta = conta_usuario
     )
 
