@@ -146,10 +146,10 @@ def cesta_servicos():
 
 def gerar_conta():
 
-    if not base_clientes:
+    if not cliente_contas:
         conta_gerada = 1
     else:
-        conta_gerada = len(base_clientes) + 1
+        conta_gerada = len(cliente_contas) + 1
     return conta_gerada
 
 
@@ -214,23 +214,22 @@ def login_cliente():
         if cliente_atual.cpf == cpf and cliente_atual.senha == senha:
             conta_selecionada = input(f"""
                     
-                                Selecione uma conta: 
-                                {mostrar_contas(cpf)}
+            Selecione uma conta: 
+            {mostrar_contas(cpf)}
                                 
-                                => """)
+            => """)
             return True, base_clientes.index(cliente_atual), conta_selecionada
     return False, None
 
 def mostrar_contas(cpf):
-    # para o pycharm ficar quieto
-    i = 0
-    ag = 0
-    cc = 0
+    listar_contas = ""
 
     for i in range(0, len(cliente_contas[cpf])):
         ag = cliente_contas[cpf][i].agencia
         cc = cliente_contas[cpf][i].conta
-    return f"{[i + 1]} Agência: {ag}, Conta corrente: {cc} \n"
+        listar_contas += f"{[i + 1]} Agência: {ag}, Conta corrente: {cc} \n"
+
+    return listar_contas
 
 def cadastrar_conta(cpf_usuario):
 
@@ -301,11 +300,18 @@ while True:
             elif opcao == "4":
                 dados_cesta = cesta_servicos()
             elif opcao == "5":
-                cadastrar_conta(conta_acessada.cpf)
+                nova_conta = cadastrar_conta(base_clientes[id_cliente].cpf)
+                cliente_contas[base_clientes[id_cliente].cpf].append(nova_conta)
+                print(f"Conta criada, Agencia: {nova_conta.agencia} Conta: {nova_conta.conta}")
+
+            elif opcao == "6":
+                conta_usada = input(f"""
+
+                                    Selecione uma conta: 
+                                    {mostrar_contas(base_clientes[id_cliente].cpf)}
+                                    => """)
             elif opcao == "0":
                 exit()
-            elif opcao == "6":
-
             else:
                 print("por favor, selecione uma opção válida")
         else:
