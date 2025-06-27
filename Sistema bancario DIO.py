@@ -38,21 +38,25 @@ cliente_contas = defaultdict(list)
 # --------------------------------------------  FUNÇÕES  --------------------------------------------- #
 
 
-def validar_input(input__desejado: str, tamanho_variavel: int):
+# Funções utilitárias
+
+def validar_input(input__desejado: str, tamanho_variavel):
+
+    variavel_validada = int(input(input__desejado).strip())
+
     while True:
 
-        variavel_validada = 0
-
         try:
-            variavel_validada = int(input(input__desejado).strip())
 
-            if tamanho_variavel == 0:
+            # Gambiarra para converter str em int, não permitindo != str
+            if tamanho_variavel == "indefinido":
                 try:
                     variavel_validada = int(input__desejado)
                 except ValueError:
                     print('Digite um valor valido')
             else:
-                if variavel_validada < 0 or len(str(variavel_validada)) != tamanho_variavel:
+                # Força o usuario a digitar 11 digitos do cpf, ou 8 digitos da data
+                if variavel_validada <= 0 or len(str(variavel_validada)) != tamanho_variavel:
                     raise ValueError
 
         except ValueError:
@@ -60,10 +64,40 @@ def validar_input(input__desejado: str, tamanho_variavel: int):
             continue
         break
     return int(variavel_validada)
-    
+
+def mostrar_extrato(extrato_cliente, saldo_cliente):
+
+    print("\n================ EXTRATO ================")
+    print(f"\nSeu extrato está disponível, {base_clientes[id_cliente].nome}, confira suas informações!")
+    print(f"\nO plano selecionado foi: {conta_acessada.cesta}")
+    print(f"\nDébito cesta de serviços R$ {conta_acessada.tarifa}")
+    print("Não foram realizadas movimentações." if not extrato_cliente else extrato_cliente)
+    print(f"\nSaldo: R$ {(saldo_cliente - conta_acessada.tarifa):.2f}")
+    print("===========================================")
+
+def gerar_conta():
+
+    if not cliente_contas:
+        conta_gerada = 1
+    else:
+        conta_gerada = len(cliente_contas) + 1
+    return conta_gerada
+
+def listar_contas(cpf):
+    mostrar_contas = ""
+
+    for i in range(0, len(cliente_contas[cpf])):
+        ag = cliente_contas[cpf][i].agencia
+        cc = cliente_contas[cpf][i].conta
+        mostrar_contas += f"\n{[i + 1]} Agência: {ag}, Conta corrente: {cc}"
+
+    return mostrar_contas
+
+# Funções núcleo
+
 def deposito(saldo_cliente, extrato_cliente):
     
-    valor = validar_input("Informe o valor do depósito: ", 0)
+    valor = validar_input("Informe o valor do depósito: ", "indefinido")
     if valor > 0:
         
         saldo_cliente += valor
@@ -95,19 +129,7 @@ def saque(saldo_cliente, extrato_cliente, numero_saques_cliente):
 
     return saldo_cliente, extrato_cliente, numero_saques_cliente
 
-
-
-def mostrar_extrato(extrato_cliente, saldo_cliente):
-
-    print("\n================ EXTRATO ================")
-    print(f"\nSeu extrato está disponível, {base_clientes[id_cliente].nome}, confira suas informações!")
-    print(f"\nO plano selecionado foi: {conta_acessada.cesta}")
-    print(f"\nDébito cesta de serviços R$ {conta_acessada.tarifa}")
-    print("Não foram realizadas movimentações." if not extrato_cliente else extrato_cliente)
-    print(f"\nSaldo: R$ {(saldo_cliente - conta_acessada.tarifa):.2f}")
-    print("===========================================")
-
-def cesta_servicos():
+def alterar_cesta():
 
     opcao_cesta = {}
 
@@ -144,16 +166,7 @@ def cesta_servicos():
             case _:
                 print("Por favor, selecione uma opção válida")
 
-def gerar_conta():
-
-    if not cliente_contas:
-        conta_gerada = 1
-    else:
-        conta_gerada = len(cliente_contas) + 1
-    return conta_gerada
-
-
-def cadastrar_pessoa(cpf_usuario):
+def cadastrar_cliente(cpf_usuario):
 
     data_nascimento = validar_input("Digite o data de nascimento (DDMMYYYY) ", 8)
 
@@ -195,45 +208,9 @@ def cadastrar_pessoa(cpf_usuario):
         endereco=endereco_usuario
     )
 
-
-def cadastrar_cliente():
-
-    cpf_usuario = validar_input("Insira o seu CPF (apenas números, 11 digitos) ", 11)
-
-    pessoa = cadastrar_pessoa(cpf_usuario)
-    conta_usuario = cadastrar_conta(cpf_usuario)
-
-    return pessoa, conta_usuario
-
-
-def login_cliente():
-    cpf = int(input("Bem vindo cliente, insira seu cpf (apenas números): ").strip())
-    senha = input("Insira sua senha: ").strip()
-
-    for i, cliente_atual in enumerate(base_clientes):
-        if cliente_atual.cpf == cpf and cliente_atual.senha == senha:
-            conta_selecionada = input(f"""
-                    
-            Selecione uma conta: 
-            {mostrar_contas(cpf)}
-                                
-            => """)
-            return True, base_clientes.index(cliente_atual), conta_selecionada
-    return False, None
-
-def mostrar_contas(cpf):
-    listar_contas = ""
-
-    for i in range(0, len(cliente_contas[cpf])):
-        ag = cliente_contas[cpf][i].agencia
-        cc = cliente_contas[cpf][i].conta
-        listar_contas += f"\n{[i + 1]} Agência: {ag}, Conta corrente: {cc}"
-
-    return listar_contas
-
 def cadastrar_conta(cpf_usuario):
 
-    opcao_cesta = cesta_servicos()
+    opcao_cesta = alterar_cesta()
 
     cesta_selecionada = opcao_cesta["Cesta selecionada"]
     limite_saque_qtd = opcao_cesta["Limite de saques quantidade"]
@@ -254,6 +231,36 @@ def cadastrar_conta(cpf_usuario):
         agencia = "0001",
         conta = conta_usuario
     )
+
+
+def novo_cliente():
+
+    cpf_usuario = validar_input("Insira o seu CPF (apenas números, 11 digitos) ", 11)
+
+    pessoa = cadastrar_cliente(cpf_usuario)
+    conta_usuario = cadastrar_conta(cpf_usuario)
+
+    return pessoa, conta_usuario
+
+
+def login_cliente():
+    cpf = int(input("Bem vindo cliente, insira seu cpf (apenas números): ").strip())
+    senha = input("Insira sua senha: ").strip()
+
+    for i, cliente_atual in enumerate(base_clientes):
+        if cliente_atual.cpf == cpf and cliente_atual.senha == senha:
+            conta_selecionada = input(f"""
+                    
+            Selecione uma conta: 
+            {mostrar_contas(cpf)}
+                                
+            => """)
+            return True, base_clientes.index(cliente_atual), conta_selecionada
+    return False, None
+
+
+
+
 
 # ---------------------------------------  PROGRAMA PRINCIPAL  --------------------------------------- #
 
@@ -298,7 +305,7 @@ while True:
             elif opcao == "3":
                 mostrar_extrato(conta_acessada.extrato, conta_acessada.saldo)
             elif opcao == "4":
-                dados_cesta = cesta_servicos()
+                dados_cesta = alterar_cesta()
             elif opcao == "5":
                 nova_conta = cadastrar_conta(base_clientes[id_cliente].cpf)
                 cliente_contas[base_clientes[id_cliente].cpf].append(nova_conta)
@@ -309,7 +316,7 @@ while True:
 
                                     Selecione uma conta: 
                                     
-                                    {mostrar_contas(base_clientes[id_cliente].cpf)}
+                                    {listar_contas(base_clientes[id_cliente].cpf)}
                                     
                                     => """)
             elif opcao == "0":
@@ -321,7 +328,7 @@ while True:
 
     if menu == "2":
 
-        cliente, conta = cadastrar_cliente()
+        cliente, conta = novo_cliente()
         base_clientes.append(cliente)
         cliente_contas.setdefault(cliente.cpf, []).append(conta)
 
