@@ -22,7 +22,7 @@ class Conta:
     limite_saque_qtd: int
     limite_saque_valor: int
     tarifa: int
-    saldo: int
+    saldo: float
     numero_saques: int
     extrato: str
     agencia: str
@@ -252,7 +252,7 @@ def login_cliente():
             conta_selecionada = input(f"""
                     
             Selecione uma conta: 
-            {mostrar_contas(cpf)}
+            {listar_contas(cpf)}
                                 
             => """)
             return True, base_clientes.index(cliente_atual), conta_selecionada
