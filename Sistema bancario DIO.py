@@ -78,9 +78,9 @@ def formatar_extrato(extrato_cliente):
         natureza = lancamento.get("Deposito")
 
         if natureza is None:
-            saida += f"Horário: {lancamento["Data"]}, {lancamento["Hora"]} Natureza: {lancamento["Saque"]}\n"
+            saida += f"Horário: {lancamento['Data']}, {lancamento['Hora']} Natureza: {lancamento['Saque']}\n"
         else:
-            saida += f"Horário: {lancamento["Data"]}, {lancamento["Hora"]} Natureza: {lancamento["Deposito"]}\n"
+            saida += f"Horário: {lancamento['Data']}, {lancamento['Hora']} Natureza: {lancamento['Deposito']}\n"
 
     return saida
 
