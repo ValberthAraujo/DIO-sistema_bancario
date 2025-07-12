@@ -1,7 +1,9 @@
 
 # ------------------------------------------  IMPORTAÇÕES  ------------------------------------------- #
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import List
+from datetime import datetime
 from collections import defaultdict
 
 
@@ -22,11 +24,11 @@ class Conta:
     limite_saque_qtd: int
     limite_saque_valor: int
     tarifa: int
-    saldo: float
-    numero_saques: int
-    extrato: str
-    agencia: str
     conta: int
+    numero_saques: int
+    saldo: float
+    agencia: str
+    extrato: List[str] = field(default_factory=list)
 
 
 # ---------------------------------------  VARIÁVEIS GLOBAIS  ---------------------------------------- #
@@ -65,6 +67,22 @@ def validar_input(input__desejado: str, tamanho_variavel):
         break
     return int(variavel_validada)
 
+
+def formatar_extrato(extrato_cliente):
+
+    saida = ""
+
+    for lancamento in extrato_cliente:
+
+        natureza = lancamento.get("Deposito")
+
+        if natureza is None:
+            saida += f"Horário: {lancamento["Data"]}, {lancamento["Hora"]} Natureza: {lancamento["Saque"]}\n"
+        else:
+            saida += f"Horário: {lancamento["Data"]}, {lancamento["Hora"]} Natureza: {lancamento["Deposito"]}\n"
+
+    return saida
+
 def mostrar_extrato(extrato_cliente, saldo_cliente):
 
     print("\n================ EXTRATO ================")
@@ -95,13 +113,17 @@ def listar_contas(cpf):
 
 # Funções núcleo
 
-def deposito(saldo_cliente, extrato_cliente):
-    
+def deposito(saldo_cliente, extrato_cliente: list):
+
+    data_hora = datetime.now()
+    data = data_hora.strftime("%d/%m/%Y")
+    hora = data_hora.strftime("%H:%M")
+
     valor = validar_input("Informe o valor do depósito: ", "indefinido")
     if valor > 0:
         
         saldo_cliente += valor
-        extrato_cliente += f"Depósito: R$ {valor:.2f}\n"
+        extrato_cliente.append({"Deposito": valor, "Data": data, "Hora": hora})
 
     else:
         
@@ -110,8 +132,12 @@ def deposito(saldo_cliente, extrato_cliente):
     return saldo_cliente, extrato_cliente
 
     
-def saque(saldo_cliente, extrato_cliente, numero_saques_cliente):
-    
+def saque(saldo_cliente, extrato_cliente: list, numero_saques_cliente):
+
+    data_hora = datetime.now()
+    data = data_hora.strftime("%d/%m/%Y")
+    hora = data_hora.strftime("%H:%M")
+
     valor = float(input("Informe o valor do saque: "))
 
     if valor > saldo_cliente:
@@ -122,7 +148,7 @@ def saque(saldo_cliente, extrato_cliente, numero_saques_cliente):
         print("Operação falhou! Você atingiu o limite de saques da sua conta!")
     elif valor > 0:
         saldo_cliente -= valor
-        extrato_cliente += f"Saque: R$ {valor:.2f}\n"
+        extrato_cliente.append({"Saque": valor, "Data": data, "Hora": hora})
         numero_saques_cliente += 1
     else:
         print("Operação falhou! O valor informado é inválido.")
@@ -227,7 +253,7 @@ def cadastrar_conta(cpf_usuario):
         tarifa = tarifa_selecionada,
         saldo = 0,
         numero_saques = 0,
-        extrato = "",
+        extrato = [],
         agencia = "0001",
         conta = conta_usuario
     )
@@ -256,7 +282,7 @@ def login_cliente():
                                 
             => """)
             return True, base_clientes.index(cliente_atual), conta_selecionada
-    return False, None
+    return None
 
 
 
@@ -278,7 +304,11 @@ while True:
 
     if menu == "1":
 
-        resultado_login, id_cliente, conta_usada = login_cliente()
+        try:
+            resultado_login, id_cliente, conta_usada = login_cliente()
+        except TypeError:
+            print("CPF ou senha incorretos, tente novamente.")
+            continue
 
         conta_acessada = cliente_contas[base_clientes[id_cliente].cpf][int(conta_usada) - 1]
 
