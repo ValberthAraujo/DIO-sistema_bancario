@@ -63,8 +63,9 @@ def validar_input(input__desejado: str, tamanho_variavel):
 
         except ValueError:
             print("Insira corretamente os dados requisitados ")
-            continue
+
         break
+
     return int(variavel_validada)
 
 
