@@ -42,33 +42,6 @@ cliente_contas = defaultdict(list)
 
 # Funções utilitárias
 
-def validar_input(input__desejado: str, tamanho_variavel):
-
-    variavel_validada = int(input(input__desejado).strip())
-
-    while True:
-
-        try:
-
-            # Gambiarra para converter str em int, não permitindo != str
-            if tamanho_variavel == "indefinido":
-                try:
-                    variavel_validada = int(input__desejado)
-                except ValueError:
-                    print('Digite um valor valido')
-            else:
-                # Força o usuario a digitar 11 digitos do cpf, ou 8 digitos da data
-                if variavel_validada <= 0 or len(str(variavel_validada)) != tamanho_variavel:
-                    raise ValueError
-
-        except ValueError:
-            print("Insira corretamente os dados requisitados ")
-
-        break
-
-    return int(variavel_validada)
-
-
 def formatar_extrato(extrato_cliente):
 
     saida = ""
@@ -78,13 +51,15 @@ def formatar_extrato(extrato_cliente):
         natureza = lancamento.get("Deposito")
 
         if natureza is None:
-            saida += f"Horário: {lancamento['Data']}, {lancamento['Hora']} Natureza: {lancamento['Saque']}\n"
+            saida += f"Horário: {lancamento['Data']} | {lancamento['Hora']} |   Saque    | Valor: {lancamento['Saque']}\n"
         else:
-            saida += f"Horário: {lancamento['Data']}, {lancamento['Hora']} Natureza: {lancamento['Deposito']}\n"
+            saida += f"Horário: {lancamento['Data']} | {lancamento['Hora']} |  Deposito  | Valor: {lancamento['Deposito']}\n"
 
     return saida
 
 def mostrar_extrato(extrato_cliente, saldo_cliente):
+
+    extrato_cliente = formatar_extrato(extrato_cliente)
 
     print("\n================ EXTRATO ================")
     print(f"\nSeu extrato está disponível, {base_clientes[id_cliente].nome}, confira suas informações!")
@@ -120,7 +95,8 @@ def deposito(saldo_cliente, extrato_cliente: list):
     data = data_hora.strftime("%d/%m/%Y")
     hora = data_hora.strftime("%H:%M")
 
-    valor = validar_input("Informe o valor do depósito: ", "indefinido")
+    valor = int(input("informe o valor do depósito"))
+
     if valor > 0:
         
         saldo_cliente += valor
@@ -195,7 +171,11 @@ def alterar_cesta():
 
 def cadastrar_cliente(cpf_usuario):
 
-    data_nascimento = validar_input("Digite o data de nascimento (DDMMYYYY) ", 8)
+    data_nascimento = input("Digite o data de nascimento (DDMMYYYY)")
+
+    if len(data_nascimento) != 8:
+        print("Digite corretamente a data de nascimento")
+        exit()
 
     for i in base_clientes:
         if i.cpf == cpf_usuario:
@@ -262,7 +242,11 @@ def cadastrar_conta(cpf_usuario):
 
 def novo_cliente():
 
-    cpf_usuario = validar_input("Insira o seu CPF (apenas números, 11 digitos) ", 11)
+    cpf_usuario = input("Insira o seu CPF (apenas números, 11 digitos) ")
+
+    if len(cpf_usuario) != 11:
+        print("Digite o cpf corretamente")
+        exit()
 
     pessoa = cadastrar_cliente(cpf_usuario)
     conta_usuario = cadastrar_conta(cpf_usuario)
