@@ -2,6 +2,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List, Union, Dict
+from base_dados import Consultas
 
 
 @dataclass
@@ -307,6 +308,7 @@ while True:
             print("Login falhou, tente novamente!")
 
     if menu == "2":
-        cadastrar_cliente()
+        cliente = cadastrar_cliente()
+        Consultas.inserir_dados_clientes(cliente.cpf, cliente.nome, cliente._senha, cliente.nascimento, cliente.endereco)
     if menu == "0":
         exit()
