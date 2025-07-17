@@ -28,12 +28,10 @@ while True:
             contas_disponiveis = cliente.listar_contas()
 
             entrada_usuario = input(
-                f"""
-                Bem vindo {cliente.nome}!
-                Escolha a conta que deseja acessar.
-                
-                {contas_disponiveis}
-                """
+                f"Bem vindo {cliente.nome}!\n"
+                "Escolha a conta que deseja acessar.\n"
+                f"\n{contas_disponiveis}"
+                "\n\n=>"
             )
             
             conta_dados = cliente.escolher_conta(int(entrada_usuario))
@@ -59,7 +57,8 @@ while True:
                     "[2] Sacar\n"
                     "[3] Extrato\n"
                     "[4] Mudar cesta de serviços\n"
-                    "[0] Sair\n\n"
+                    "[5] Cadastrar nova conta!\n"
+                    "[0] Voltar ao menu\n\n"
                     "=>"
                 )
 
@@ -71,6 +70,9 @@ while True:
                     conta.mostrar_extrato()
                 elif entrada_conta == "4":
                     conta.alterar_cesta()
+                elif entrada_conta == "5":
+                    conta.cadastrar_conta(cliente.cpf)
+                    tela_conta = False
                 elif entrada_conta == "0":
                     tela_conta = False
                 else:
