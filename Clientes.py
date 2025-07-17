@@ -18,9 +18,16 @@ class Cliente:
         self.nascimento = nascimento
         self.endereco = endereco
 
-    def listar_contas(self) -> None:
-        for conta in base_dados.mostrar_contas(self.cpf):
-            print(f"\nConta {conta[0]}, saldo {conta[3]}.")
+    def listar_contas(self) -> str:
+
+        contas = base_dados.mostrar_contas(self.cpf)
+        resultado = []
+
+        for conta in contas:
+            resultado.append(f"Conta [{conta[0]}]  |  saldo {conta[3]}.")
+
+        return "\n".join(resultado)
+
 
     def escolher_conta(self, conta_selecionada):
         for conta in base_dados.mostrar_contas(self.cpf):

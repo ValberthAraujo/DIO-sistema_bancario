@@ -5,6 +5,7 @@ cursor = conexao.cursor()
 
 # Modelos de Tabela
 
+
 def criar_tabela_clientes():
     cursor.execute(
         "CREATE TABLE clientes ("
@@ -65,6 +66,16 @@ def inserir_dados_extrato(conta, data, lancamento, valor):
         "VALUES (?, ?, ?, ?)",
         (conta, data, lancamento, valor)
     )
+    conexao.commit()
+
+# Atualização de dados
+
+def atualizar_saldo(saldo, conta):
+    cursor.execute(
+        "UPDATE contas SET saldo = ? WHERE conta = ?",
+        (saldo, conta)
+    )
+    conexao.commit()
 
 # Mostrar dados
 

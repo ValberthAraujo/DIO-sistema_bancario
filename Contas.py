@@ -1,6 +1,5 @@
 import base_dados
 from datetime import datetime
-from decimal import Decimal
 
 class Conta:
 
@@ -9,7 +8,7 @@ class Conta:
             cpf: int,
             conta: int,
             numero_saque: int = 0,
-            saldo: Decimal = Decimal("0.00"),
+            saldo: float = 0,
             cesta: str = "Prata",
             tarifa: int = 10,
             limite_saque: int = 3,
@@ -38,12 +37,12 @@ class Conta:
         data_valor = datetime.now()
         data_texto = data_valor.strftime("%d/%m/%Y %H %M")
 
-        valor = input("informe o valor do depósito").strip()
-        valor = Decimal(valor)
+        valor = int(input("informe o valor do depósito").strip())
 
         if valor > 0:
             self._saldo += valor
             base_dados.inserir_dados_extrato(self.conta, data_texto, "Deposito", valor)
+            base_dados.atualizar_saldo(self._saldo, self.conta)
         else:
             print("Operação falhou! O valor informado é inválido.")
 
@@ -52,8 +51,7 @@ class Conta:
         data_valor = datetime.now()
         data_texto = data_valor.strftime("%d/%m/%Y %H %M")
 
-        valor = input("Informe o valor do saque: ")
-        valor = Decimal(valor)
+        valor = int(input("Informe o valor do saque: "))
 
         if valor > self._saldo:
             print("A operação falhou!"
@@ -65,13 +63,16 @@ class Conta:
             self._saldo -= valor
             self._numero_saque += 1
             base_dados.inserir_dados_extrato(self.conta, data_texto, "Saque", valor)
+            base_dados.atualizar_saldo(self._saldo, self.conta)
         else:
             print("Operação falhou!"
                   " O valor informado é inválido.")
 
     def alterar_cesta(self) -> None:
 
-        while True:
+        tela_cesta = True
+
+        while tela_cesta:
             plano = input("""
             Selecione o tipo de plano desejado:
 
@@ -86,16 +87,20 @@ class Conta:
                     self.cesta = "Prata"
                     self.limite_saque = 3
                     self.tarifa = 10
+                    tela_cesta = False
                 case "2":
                     self.cesta = "Ouro"
                     self.limite_saque = 5
                     self.tarifa = 15
+                    tela_cesta = False
                 case "3":
                     self.cesta = "Diamante"
                     self.limite_saque = 10
                     self.tarifa = 20
+                    tela_cesta = False
                 case _:
                     print("Por favor, selecione uma opção válida")
+
 
     def mostrar_extrato(self) -> None:
 

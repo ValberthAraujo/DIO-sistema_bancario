@@ -1,6 +1,6 @@
 import base_dados
-from Modulos.Contas import Conta
-from Modulos.Clientes import Cliente
+from Clientes import Cliente
+from Contas import Conta
 
 
 while True:
@@ -25,16 +25,18 @@ while True:
 
         while True:
 
+            contas_disponiveis = cliente.listar_contas()
+
             entrada_usuario = input(
                 f"""
                 Bem vindo {cliente.nome}!
                 Escolha a conta que deseja acessar.
                 
-                {cliente.listar_contas()}
+                {contas_disponiveis}
                 """
             )
             
-            conta_dados = cliente.escolher_conta(entrada_usuario)
+            conta_dados = cliente.escolher_conta(int(entrada_usuario))
             conta = Conta(
                 cpf=cliente.cpf,
                 conta=conta_dados[0],
@@ -46,28 +48,33 @@ while True:
                 agencia=conta_dados[1]
             )
 
-            entrada_conta = input(
-                f"Bem vindo {cliente.nome}\n"
-                f"conta: {conta.conta}!\n"
-                "Escolha o que deseja fazer:\n\n"
-                "[1] Depositar\n"
-                "[2] Sacar\n"
-                "[3] Extrato\n"
-                "[4] Mudar cesta de serviços\n"
-                "[0] Sair\n\n"
-                "=>"
-            )
+            tela_conta=True
 
-            if entrada_conta == "1":
-                conta.deposito()
-            elif entrada_conta == "2":
-                conta.saque()
-            elif entrada_conta == "3":
-                conta.mostrar_extrato()
-            elif entrada_conta == "4":
-                conta.alterar_cesta()
-            else:
-                print("por favor, selecione uma opção válida")
+            while tela_conta:
+                entrada_conta = input(
+                    f"Bem vindo {cliente.nome}\n"
+                    f"conta: {conta.conta}!\n"
+                    "Escolha o que deseja fazer:\n\n"
+                    "[1] Depositar\n"
+                    "[2] Sacar\n"
+                    "[3] Extrato\n"
+                    "[4] Mudar cesta de serviços\n"
+                    "[0] Sair\n\n"
+                    "=>"
+                )
+
+                if entrada_conta == "1":
+                    conta.deposito()
+                elif entrada_conta == "2":
+                    conta.saque()
+                elif entrada_conta == "3":
+                    conta.mostrar_extrato()
+                elif entrada_conta == "4":
+                    conta.alterar_cesta()
+                elif entrada_conta == "0":
+                    tela_conta = False
+                else:
+                    print("por favor, selecione uma opção válida")
 
     if menu == "2":
         Cliente.cadastrar_cliente()
