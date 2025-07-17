@@ -1,27 +1,33 @@
-import base_dados
-from Clientes import Cliente
-from Contas import Conta
+import sqlite3
 
+from modulos import base_dados
+from modulos.Clientes import Cliente
+from modulos.Contas import Conta
+
+conexao = sqlite3.connect("base_dados.sqlite")
+cursor = conexao.cursor()
 
 while True:
 
-    menu = input("""
+    menu = input(
+        """
     Escolha a opção desejada:
     [1] Entrar
     [2] Cadastrar-se
     [0] Sair
-    => """)
+    => """
+    )
 
     if menu == "1":
 
         cpf = int(input("Insira seu cpf! ").strip())
         senha = input("Insira sua senha! ").strip()
 
-        usuario = base_dados.login(cpf, senha)
+        usuario = base_dados.login(cursor, cpf, senha)
 
         exit() if usuario is None else usuario
 
-        cliente = Cliente(usuario[1],usuario[2])
+        cliente = Cliente(usuario[1], usuario[2])
 
         while True:
 
@@ -33,7 +39,7 @@ while True:
                 f"\n{contas_disponiveis}"
                 "\n\n=>"
             )
-            
+
             conta_dados = cliente.escolher_conta(int(entrada_usuario))
             conta = Conta(
                 cpf=cliente.cpf,
@@ -43,10 +49,10 @@ while True:
                 cesta=conta_dados[7],
                 tarifa=conta_dados[6],
                 limite_saque=conta_dados[4],
-                agencia=conta_dados[1]
+                agencia=conta_dados[1],
             )
 
-            tela_conta=True
+            tela_conta = True
 
             while tela_conta:
                 entrada_conta = input(
@@ -75,7 +81,7 @@ while True:
                     cliente.cadastrar_conta(cliente.cpf)
                     tela_conta = False
                 elif entrada_conta == "6":
-                    base_dados.apagar_conta(conta.conta)
+                    base_dados.apagar_conta(conexao, cursor, conta.conta)
                     tela_conta = False
                 elif entrada_conta == "0":
                     tela_conta = False

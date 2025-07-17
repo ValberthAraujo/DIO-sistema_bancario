@@ -1,12 +1,12 @@
 import sqlite3
 
-conexao = sqlite3.connect("base_dados.sqlite")
-cursor = conexao.cursor()
+connect = sqlite3.connect("base_dados.sqlite")
+cur = connect.cursor()
 
 # Modelos de Tabela
 
 
-def criar_tabela_clientes():
+def criar_tabela_clientes(cursor):
     cursor.execute(
         "CREATE TABLE clientes ("
         "id integer PRIMARY KEY AUTOINCREMENT,"
@@ -17,7 +17,8 @@ def criar_tabela_clientes():
         "endereco text)"
     )
 
-def criar_tabela_contas():
+
+def criar_tabela_contas(cursor):
     cursor.execute(
         "CREATE TABLE contas("
         "conta INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -28,9 +29,11 @@ def criar_tabela_contas():
         "numero_saques INTEGER,"
         "tarifa INTEGER,"
         "cesta TEXT,"
-        "FOREIGN KEY (usuario_id) REFERENCES clientes(id))")
+        "FOREIGN KEY (usuario_id) REFERENCES clientes(id))"
+    )
 
-def criar_tabela_lancamentos():
+
+def criar_tabela_lancamentos(cursor):
     cursor.execute(
         "CREATE TABLE lancamentos ("
         "id integer PRIMARY KEY AUTOINCREMENT,"
@@ -41,90 +44,89 @@ def criar_tabela_lancamentos():
         "FOREIGN KEY (conta) REFERENCES contas(conta))"
     )
 
+
 # Inserção de dados
 
+
 def inserir_dados_contas(
-        agencia: int,
-        usuario_id: int,
-        saldo: float,
-        limite_saque: int,
-        numero_saques: int,
-        tarifa: int,
-        cesta: str
+    conexao,
+    cursor,
+    agencia: int,
+    usuario_id: int,
+    saldo: float,
+    limite_saque: int,
+    numero_saques: int,
+    tarifa: int,
+    cesta: str,
 ) -> None:
 
     cursor.execute(
-        "INSERT INTO contas (agencia, usuario_id, saldo, limite_saque, numero_saques, tarifa, cesta) "
+        "INSERT INTO contas ("
+        "agencia, "
+        "usuario_id, "
+        "saldo, "
+        "limite_saque, "
+        "numero_saques, "
+        "tarifa, "
+        "cesta) "
         "VALUES (?,?,?,?,?,?,?)",
-        (agencia, usuario_id, saldo, limite_saque, numero_saques, tarifa, cesta)
+        (agencia, usuario_id, saldo, limite_saque, numero_saques, tarifa, cesta),
     )
     conexao.commit()
 
-def inserir_dados_extrato(conta, data, lancamento, valor):
+
+def inserir_dados_extrato(conexao, cursor, conta, data, lancamento, valor):
     cursor.execute(
         "INSERT INTO lancamentos(conta, data, lancamento, valor) "
         "VALUES (?, ?, ?, ?)",
-        (conta, data, lancamento, valor)
+        (conta, data, lancamento, valor),
     )
     conexao.commit()
+
 
 # Atualização de dados
-
-def atualizar_saldo(saldo, conta):
-    cursor.execute(
-        "UPDATE contas SET saldo = ? WHERE conta = ?",
-        (saldo, conta)
-    )
+def atualizar_saldo(conexao, cursor, saldo, conta):
+    cursor.execute("UPDATE contas SET saldo = ? WHERE conta = ?", (saldo, conta))
     conexao.commit()
 
-def apagar_conta(conta):
-    cursor.execute(
-        "DELETE FROM contas WHERE conta = ?",
-        (conta,)
-    )
+
+def apagar_conta(conexao, cursor, conta):
+    cursor.execute("DELETE FROM contas WHERE conta = ?", (conta,))
     conexao.commit()
 
-# Mostrar dados
 
-def mostrar_extrato(conta: int) -> None:
+def mostrar_extrato(cursor, conta: int) -> None:
     cursor.execute(
-        "SELECT data, lancamento, valor FROM lancamentos WHERE conta = ?",
-        (conta,)
+        "SELECT data, lancamento, valor FROM lancamentos WHERE conta = ?", (conta,)
     )
 
     for data, lancamento, valor in cursor.fetchall():
         print(f"{data} | {lancamento} | {valor}")
 
-def mostrar_contas(cpf: int) -> list:
-    cursor.execute(
-        "SELECT id FROM clientes WHERE cpf = ?",
-        (cpf,)
-    )
+
+def mostrar_contas(cursor, cpf: int) -> list:
+    cursor.execute("SELECT id FROM clientes WHERE cpf = ?", (cpf,))
     id_cliente = cursor.fetchone()[0]
 
-    cursor.execute(
-        "SELECT * FROM contas where usuario_id = ?",
-        (id_cliente,)
-    )
+    cursor.execute("SELECT * FROM contas where usuario_id = ?", (id_cliente,))
 
     contas = cursor.fetchall()
 
     return contas
 
-def id_usuario(cpf:int) -> int:
-    cursor.execute(
-        "SELECT id FROM clientes WHERE cpf = ?",
-        (cpf,)
-    )
+
+def id_usuario(cursor, cpf: int) -> int:
+    cursor.execute("SELECT id FROM clientes WHERE cpf = ?", (cpf,))
     return cursor.fetchone()[0]
 
-def id_conta(cpf) -> int:
+
+def id_conta(cursor, cpf) -> int:
     cursor.execute(
         "SELECT MAX(conta) "
         "FROM contas "
         "LEFT JOIN clientes ON contas.usuario_id = clientes.id "
         "WHERE cpf = ?",
-        (cpf,)
+        (cpf,),
     )
     resultado = cursor.fetchone()[0]
 
@@ -135,24 +137,22 @@ def id_conta(cpf) -> int:
 
     return conta_criada
 
+
 # Funções de cadastro e login
 
-def cadastrar_cliente(cpf, nome, senha, nascimento, endereco):
+
+def cadastrar_cliente(conexao, cursor, cpf, nome, senha, nascimento, endereco):
     cursor.execute(
         "INSERT INTO clientes (cpf, nome, senha, nascimento, endereco)"
         " VALUES (?,?,?,?,?)",
-        (cpf, nome, senha, nascimento, endereco)
+        (cpf, nome, senha, nascimento, endereco),
     )
     conexao.commit()
 
-def login(cpf, senha):
 
-    cursor.execute(
-        "SELECT senha "
-            "FROM clientes "
-            "WHERE cpf = ?",
-  (cpf,)
-    )
+def login(cursor, cpf, senha):
+
+    cursor.execute("SELECT senha " "FROM clientes " "WHERE cpf = ?", (cpf,))
 
     senha_db = cursor.fetchone()
 
@@ -162,15 +162,9 @@ def login(cpf, senha):
 
     if senha == senha_db[0]:
         print("Login bem sucedido!")
-        cursor.execute(
-            "SELECT * "
-            "FROM clientes "
-            "WHERE cpf = (?)",
-            (cpf,)
-        )
+        cursor.execute("SELECT * " "FROM clientes " "WHERE cpf = (?)", (cpf,))
 
         return cursor.fetchone()
-
 
     else:
         print("Acesso negado.")
