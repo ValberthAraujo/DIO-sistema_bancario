@@ -77,6 +77,13 @@ def atualizar_saldo(saldo, conta):
     )
     conexao.commit()
 
+def apagar_conta(conta):
+    cursor.execute(
+        "DELETE FROM contas WHERE conta = ?",
+        (conta,)
+    )
+    conexao.commit()
+
 # Mostrar dados
 
 def mostrar_extrato(conta: int) -> None:

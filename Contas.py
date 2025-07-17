@@ -110,18 +110,3 @@ class Conta:
         base_dados.mostrar_extrato(self.conta)
         print(f"\nSaldo: R$ {(self._saldo - self.tarifa):.2f}")
         print("===========================================")
-
-    @staticmethod
-    def cadastrar_conta(cpf: int):
-
-        id_usuario = base_dados.id_usuario(cpf)
-
-        base_dados.inserir_dados_contas(
-            agencia=1,
-            usuario_id=id_usuario,
-            limite_saque=3,
-            saldo=0,
-            numero_saques=0,
-            tarifa=10,
-            cesta="Prata"
-        )

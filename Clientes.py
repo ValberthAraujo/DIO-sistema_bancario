@@ -1,6 +1,5 @@
 from typing import Optional
 import base_dados
-import Contas
 
 class Cliente:
 
@@ -30,9 +29,36 @@ class Cliente:
 
 
     def escolher_conta(self, conta_selecionada):
-        for conta in base_dados.mostrar_contas(self.cpf):
+
+        contas = base_dados.mostrar_contas(self.cpf)
+        for conta in contas:
             if conta_selecionada == conta[0]:
                 return conta
+        return None
+
+    @staticmethod
+    def apagar_conta(saldo: int, conta: int) -> None:
+        if saldo > 0:
+            print("Não é possivel apagar a conta,"
+                  "retire o saldo e tente novamente!")
+        else:
+            base_dados.apagar_conta(conta)
+            print("Conta apagada com sucesso!")
+
+    @staticmethod
+    def cadastrar_conta(cpf: int) -> None:
+
+        id_usuario = base_dados.id_usuario(cpf)
+
+        base_dados.inserir_dados_contas(
+            agencia=1,
+            usuario_id=id_usuario,
+            limite_saque=3,
+            saldo=0,
+            numero_saques=0,
+            tarifa=10,
+            cesta="Prata"
+        )
 
     @staticmethod
     def cadastrar_cliente() -> None:
@@ -91,6 +117,6 @@ class Cliente:
             endereco
         )
 
-        Contas.cadastrar_conta(cpf)
+        Cliente.cadastrar_conta(cpf)
 
         return None

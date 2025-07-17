@@ -58,6 +58,7 @@ while True:
                     "[3] Extrato\n"
                     "[4] Mudar cesta de serviços\n"
                     "[5] Cadastrar nova conta!\n"
+                    "[6] Apagar conta\n"
                     "[0] Voltar ao menu\n\n"
                     "=>"
                 )
@@ -71,7 +72,10 @@ while True:
                 elif entrada_conta == "4":
                     conta.alterar_cesta()
                 elif entrada_conta == "5":
-                    conta.cadastrar_conta(cliente.cpf)
+                    cliente.cadastrar_conta(cliente.cpf)
+                    tela_conta = False
+                elif entrada_conta == "6":
+                    base_dados.apagar_conta(conta.conta)
                     tela_conta = False
                 elif entrada_conta == "0":
                     tela_conta = False
