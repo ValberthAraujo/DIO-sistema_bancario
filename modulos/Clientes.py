@@ -29,7 +29,6 @@ class Cliente:
             resultado = []
             for conta in contas:
                 resultado.append(f"Conta [{conta[0]}]  |  saldo {conta[3]}.")
-            conexao.close()
             return "\n".join(resultado)
 
     def escolher_conta(self, conta_selecionada):
